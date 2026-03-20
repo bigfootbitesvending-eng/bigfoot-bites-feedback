@@ -576,7 +576,7 @@
         approx_time:        document.getElementById('approx-time').value,
         contact_info:       document.getElementById('contact-info').value.trim(),
         market_improvement: document.getElementById('improvement').value.trim(),
-        submitted_at:       new Date().toISOString(),
+        submitted_at: new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }),
       };
 
       try {
