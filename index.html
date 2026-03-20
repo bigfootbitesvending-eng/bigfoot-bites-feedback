@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bigfoot Bites — Customer Feedback</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #f7f7f5;
+      --surface:   #ffffff;
+      --border:    #d8d8d4;
+      --text:      #111111;
+      --muted:     #767672;
+      --error:     #c0392b;
+      --radius:    10px;
+      --font-head: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.5;
+      min-height: 100dvh;
+      padding-bottom: 60px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 20px 22px;
+      text-align: center;
+    }
+
+    .logo-img {
+      display: block;
+      margin: 0 auto 10px;
+      width: 130px;
+      height: auto;
+    }
+
+    .header-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* shown via JS when ?site= is present */
+    .site-badge {
+      display: none;
+      margin-top: 12px;
+      background: #111;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 999px;
+    }
+
+    /* ── LAYOUT ── */
+    .form-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 28px 20px 0;
+    }
+
+    /* ── NO-JS NOTICE ── */
+    .nojs-notice {
+      background: #111;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* ── FIELD ── */
+    .field { margin-bottom: 20px; }
+
+    .field-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .field-label .req { color: var(--text); margin-left: 2px; }
+
+    /* Annotation visible in no-JS; hidden when JS runs */
+    .cond-note {
+      font-weight: 400;
+      font-size: 0.72rem;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+      text-transform: none;
+    }
+
+    /* ── RADIO GROUP ── */
+    .radio-group { display: flex; flex-direction: column; gap: 9px; }
+
+    .radio-option { position: relative; }
+
+    .radio-option input[type="radio"] {
+      position: absolute; opacity: 0; width: 0; height: 0;
+    }
+
+    .radio-option label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 16px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: border-color 0.15s, background 0.15s;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .radio-option label::before {
+      content: '';
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+
+    .radio-option input[type="radio"]:checked + label {
+      border-color: var(--text);
+      background: #f0f0ee;
+    }
+
+    .radio-option input[type="radio"]:checked + label::before {
+      border-color: var(--text);
+      background: var(--text);
+      box-shadow: inset 0 0 0 4px var(--surface);
+    }
+
+    .radio-option input[type="radio"]:focus-visible + label {
+      outline: 2px solid var(--text);
+      outline-offset: 2px;
+    }
+
+    /* ── INPUTS ── */
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      padding: 12px 14px;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    textarea:focus { outline: none; border-color: var(--text); }
+
+    input::placeholder, textarea::placeholder { color: #b0b0ab; }
+
+    textarea { resize: vertical; min-height: 96px; }
+
+    .date-time-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ── ERROR ── */
+    .field.has-error input,
+    .field.has-error textarea { border-color: var(--error); }
+
+    .field-error-msg {
+      display: none;
+      font-size: 0.76rem;
+      color: var(--error);
+      margin-top: 5px;
+    }
+
+    .field.has-error .field-error-msg { display: block; }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 26px 0; }
+
+    /* ─────────────────────────────────────────────
+       CONDITIONAL FIELD LOGIC
+       When JS is running, <body> gets class "js-ready".
+       .conditional-field is then hidden by default.
+       JS adds class "shown" when Refund Request is active.
+       Without JS: body never gets "js-ready" so all fields
+       are visible and the .cond-note annotation is visible.
+    ───────────────────────────────────────────── */
+    body.js-ready .conditional-field       { display: none; }
+    body.js-ready .conditional-field.shown { display: block; }
+    body.js-ready .cond-note               { display: none; }
+
+    /* ── SUBMIT ── */
+    .btn-submit {
+      display: block;
+      width: 100%;
+      background: var(--text);
+      color: #fff;
+      font-family: var(--font-head);
+      font-size: 1.15rem;
+      letter-spacing: 0.12em;
+      border: none;
+      border-radius: var(--radius);
+      padding: 17px 20px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 28px;
+    }
+
+    .btn-submit:hover  { background: #333; }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+    .spinner {
+      display: none;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    .btn-submit.loading .btn-text { display: none; }
+    .btn-submit.loading .spinner  { display: block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SUCCESS / ERROR ── */
+    .state-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 24px;
+      min-height: 60vh;
+    }
+
+    .state-overlay.active { display: flex; }
+
+    .state-icon {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    .state-title {
+      font-family: var(--font-head);
+      font-size: 2rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .state-body {
+      font-size: 0.9rem;
+      color: var(--muted);
+      max-width: 300px;
+      line-height: 1.6;
+    }
+
+    .btn-retry {
+      margin-top: 24px;
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 12px 26px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <!--
+      Deploy note: place Logo.png in the same directory as index.html.
+      The logo is black-on-white and renders cleanly on this background.
+    -->
+    <img src="./Logo.png" alt="Bigfoot Bites" class="logo-img" />
+    <div class="header-sub">Customer Feedback</div>
+    <div class="site-badge" id="site-badge"></div>
+  </header>
+
+  <main>
+    <div class="form-wrap" id="form-section">
+
+      <!--
+        Rendered only when JS is disabled.
+        Explains which fields are required for refund requests.
+      -->
+      <noscript>
+        <div class="nojs-notice">
+          <strong>Note:</strong> For refund requests, product name, date and time
+          of visit, and your contact info are required so we can follow up with you.
+        </div>
+      </noscript>
+
+      <form id="feedback-form" novalidate>
+
+        <!-- 1. Request Type — always required -->
+        <div class="field" id="field-request-type">
+          <div class="field-label">What can we help with? <span class="req">*</span></div>
+          <div class="radio-group" role="radiogroup" aria-required="true">
+            <div class="radio-option">
+              <input type="radio" name="request_type" id="rt-refund"  value="Refund Request" />
+              <label for="rt-refund">Refund Request</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="request_type" id="rt-product" value="Product Request" />
+              <label for="rt-product">Product Request</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="request_type" id="rt-comment" value="General Comment" />
+              <label for="rt-comment">General Comment</label>
+            </div>
+          </div>
+          <div class="field-error-msg">Please select an option.</div>
+        </div>
+
+        <!-- 2. Tell us more — label swaps dynamically via JS -->
+        <div class="field">
+          <label class="field-label" for="details" id="details-label">Tell us more</label>
+          <textarea id="details" name="tell_us_more" rows="4"
+                    placeholder="Share the details…"></textarea>
+        </div>
+
+        <!--
+          Fields 3–5 are CONDITIONAL.
+          No-JS: always visible; label carries a plain-language note about when they're required.
+          JS mode: hidden until Refund Request is selected; note hidden; JS manages req asterisk.
+        -->
+
+        <!-- 3. Product Name -->
+        <div class="field conditional-field" id="field-product">
+          <label class="field-label" for="product-name">
+            Product name
+            <span class="cond-note"> — required for refund requests</span>
+            <span class="req" id="product-req" style="display:none"> *</span>
+          </label>
+          <input type="text" id="product-name" name="product_name"
+                 placeholder="e.g. Doritos Nacho Cheese" autocomplete="off" />
+          <div class="field-error-msg">Please enter the product name.</div>
+        </div>
+
+        <!-- 4. Date and Time of Visit -->
+        <div class="field conditional-field" id="field-datetime">
+          <div class="field-label">
+            Date and time of visit
+            <span class="cond-note"> — required for refund requests</span>
+            <span class="req" id="datetime-req" style="display:none"> *</span>
+          </div>
+          <div class="date-time-row">
+            <input type="date" id="approx-date" name="approx_date"
+                   aria-label="Date of visit" />
+            <input type="time" id="approx-time" name="approx_time"
+                   aria-label="Time of visit" />
+          </div>
+          <div class="field-error-msg">Please enter the date and time of your visit.</div>
+        </div>
+
+        <!-- 5. Contact Info -->
+        <div class="field conditional-field" id="field-contact">
+          <label class="field-label" for="contact-info">
+            Contact info
+            <span class="cond-note"> — required for refund requests</span>
+            <span class="req" id="contact-req" style="display:none"> *</span>
+          </label>
+          <input type="text" id="contact-info" name="contact_info"
+                 placeholder="Phone or email" autocomplete="off" />
+          <div class="field-error-msg">Contact info is required so we can process your refund.</div>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- 6. Market Improvement — always shown, always optional -->
+        <div class="field">
+          <label class="field-label" for="improvement">
+            Help us improve
+            <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.72rem"> (optional)</span>
+          </label>
+          <textarea id="improvement" name="market_improvement" rows="3"
+                    placeholder="Products you'd like to see, anything about the space…"></textarea>
+        </div>
+
+        <!-- 7. Hidden site key — populated from ?site= URL param by JS -->
+        <input type="hidden" id="site-name" name="site_name" value="" />
+
+        <button type="submit" class="btn-submit" id="submit-btn">
+          <span class="btn-text">Send Feedback</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+
+      </form>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="state-overlay" id="success-state">
+      <div class="state-icon" style="color:#111">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M4 14l7 7 13-13" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="state-title">Got it.</div>
+      <p class="state-body">Thanks for reaching out. We'll be in touch if you requested a refund.</p>
+    </div>
+
+    <!-- ERROR -->
+    <div class="state-overlay" id="error-state">
+      <div class="state-icon" style="color:var(--error)">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M14 8v8M14 20v1.5" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="state-title">Something went wrong.</div>
+      <p class="state-body">
+        Your response wasn't saved. Please try again or email us at
+        bigfootbitesvending@gmail.com.
+      </p>
+      <button class="btn-retry" onclick="resetForm()">Try Again</button>
+    </div>
+  </main>
+
+  <script>
+    /* ─────────────────────────────────────────
+       CONFIG — replace with your n8n webhook URL
+    ───────────────────────────────────────── */
+    const WEBHOOK_URL = 'https://YOUR_N8N_INSTANCE/webhook/bigfoot-bites-feedback';
+
+    /* JS is running — activate CSS conditional-field rules */
+    document.body.classList.add('js-ready');
+
+    /* ── Elements ── */
+    const radios       = document.querySelectorAll('input[name="request_type"]');
+    const conditionals = document.querySelectorAll('.conditional-field');
+    const submitBtn    = document.getElementById('submit-btn');
+
+    const DETAIL_LABELS = {
+      'Refund Request':  'Describe what happened',
+      'Product Request': 'What product are you looking for?',
+      'General Comment': 'Tell us more',
+    };
+
+    /* ── Read ?site= param ── */
+    const params  = new URLSearchParams(window.location.search);
+    const siteKey = params.get('site') || '';
+    document.getElementById('site-name').value = siteKey;
+
+    if (siteKey) {
+      const badge = document.getElementById('site-badge');
+      badge.textContent = siteKey.replace(/-/g, ' ');
+      badge.style.display = 'inline-block';
+    }
+
+    /* ── Required marker helpers ── */
+    function setReqMarkers(on) {
+      ['product-req', 'datetime-req', 'contact-req'].forEach(id => {
+        document.getElementById(id).style.display = on ? 'inline' : 'none';
+      });
+    }
+
+    /* ── Radio change ── */
+    radios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        const type     = radio.value;
+        const isRefund = type === 'Refund Request';
+
+        /* Swap detail label */
+        document.getElementById('details-label').textContent =
+          DETAIL_LABELS[type] || 'Tell us more';
+
+        /* Show / hide conditional fields */
+        conditionals.forEach(f => {
+          f.classList.toggle('shown', isRefund);
+          f.classList.remove('has-error');
+        });
+
+        /* Required asterisks */
+        setReqMarkers(isRefund);
+      });
+    });
+
+    /* ── Validation ── */
+    function getType() {
+      const c = document.querySelector('input[name="request_type"]:checked');
+      return c ? c.value : null;
+    }
+
+    function validate() {
+      let ok   = true;
+      const type = getType();
+
+      const typeField = document.getElementById('field-request-type');
+      typeField.classList.toggle('has-error', !type);
+      if (!type) ok = false;
+
+      if (type === 'Refund Request') {
+        const product     = document.getElementById('product-name').value.trim();
+        const date        = document.getElementById('approx-date').value;
+        const time        = document.getElementById('approx-time').value;
+        const contact     = document.getElementById('contact-info').value.trim();
+        const hasDatetime = date || time; /* at least one is enough */
+
+        document.getElementById('field-product').classList.toggle('has-error', !product);
+        document.getElementById('field-datetime').classList.toggle('has-error', !hasDatetime);
+        document.getElementById('field-contact').classList.toggle('has-error', !contact);
+
+        if (!product || !hasDatetime || !contact) ok = false;
+      } else {
+        ['field-product', 'field-datetime', 'field-contact']
+          .forEach(id => document.getElementById(id).classList.remove('has-error'));
+      }
+
+      return ok;
+    }
+
+    /* ── Submit ── */
+    document.getElementById('feedback-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!validate()) return;
+
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      const payload = {
+        site_name:          siteKey,
+        request_type:       getType(),
+        tell_us_more:       document.getElementById('details').value.trim(),
+        product_name:       document.getElementById('product-name').value.trim(),
+        approx_date:        document.getElementById('approx-date').value,
+        approx_time:        document.getElementById('approx-time').value,
+        contact_info:       document.getElementById('contact-info').value.trim(),
+        market_improvement: document.getElementById('improvement').value.trim(),
+        submitted_at:       new Date().toISOString(),
+      };
+
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        document.getElementById('form-section').style.display = 'none';
+        document.getElementById('success-state').classList.add('active');
+
+      } catch (err) {
+        console.error(err);
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        document.getElementById('form-section').style.display = 'none';
+        document.getElementById('error-state').classList.add('active');
+      }
+    });
+
+    /* ── Retry ── */
+    function resetForm() {
+      document.getElementById('error-state').classList.remove('active');
+      document.getElementById('form-section').style.display = 'block';
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    }
+  </script>
+</body>
+</html>
