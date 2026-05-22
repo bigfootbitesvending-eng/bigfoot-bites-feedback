@@ -234,7 +234,7 @@
       font-family: var(--font-head);
       font-size: 1.15rem;
       letter-spacing: 0.12em;
-      border: none;site
+      border: none;
       border-radius: var(--radius);
       padding: 17px 20px;
       cursor: pointer;
@@ -489,7 +489,7 @@
 
     /* ── Read ?site= param ── */
     const params  = new URLSearchParams(window.location.search);
-    const siteKey = params.get('site-key') || '';
+    const siteKey = params.get('site-key') || params.get('site') || '';
     document.getElementById('site-name').value = siteKey;
 
     if (siteKey) {
