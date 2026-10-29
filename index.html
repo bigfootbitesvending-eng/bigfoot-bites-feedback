@@ -310,6 +310,15 @@
       font-size: 0.9rem;
       cursor: pointer;
     }
+
+    /* ── HONEYPOT ── off-screen, not display:none, so a bot still sees a fillable field */
+    .hp-field {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
   </style>
 </head>
 
@@ -364,7 +373,7 @@
         <!-- 2. Tell us more — label swaps dynamically via JS -->
         <div class="field">
           <label class="field-label" for="details" id="details-label">Tell us more</label>
-          <textarea id="details" name="tell_us_more" rows="4"
+          <textarea id="details" name="tell_us_more" rows="4" maxlength="2000"
                     placeholder="Share the details…"></textarea>
         </div>
 
@@ -381,7 +390,7 @@
             <span class="cond-note"> — required for refund requests</span>
             <span class="req" id="product-req" style="display:none"> *</span>
           </label>
-          <input type="text" id="product-name" name="product_name"
+          <input type="text" id="product-name" name="product_name" maxlength="2000"
                  placeholder="e.g. Doritos Nacho Cheese" autocomplete="off" />
           <div class="field-error-msg">Please enter the product name.</div>
         </div>
@@ -409,7 +418,7 @@
             <span class="cond-note"> — required for refund requests</span>
             <span class="req" id="contact-req" style="display:none"> *</span>
           </label>
-          <input type="text" id="contact-info" name="contact_info"
+          <input type="text" id="contact-info" name="contact_info" maxlength="2000"
                  placeholder="Phone or email" autocomplete="off" />
           <div class="field-error-msg">Contact info is required so we can process your refund.</div>
         </div>
@@ -422,12 +431,18 @@
             Help us improve
             <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.72rem"> (optional)</span>
           </label>
-          <textarea id="improvement" name="market_improvement" rows="3"
+          <textarea id="improvement" name="market_improvement" rows="3" maxlength="2000"
                     placeholder="Products you'd like to see, anything about the space…"></textarea>
         </div>
 
         <!-- 7. Hidden site key — populated from ?site= URL param by JS -->
         <input type="hidden" id="site-name" name="site_name" value="" />
+
+        <!-- 8. Honeypot — real visitors never see it; the workflow drops any submission where it is filled -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="website">Website</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
 
         <button type="submit" class="btn-submit" id="submit-btn">
           <span class="btn-text">Send Feedback</span>
@@ -464,6 +479,18 @@
       </p>
       <button class="btn-retry" onclick="resetForm()">Try Again</button>
     </div>
+
+    <!-- NO SITE: the page was opened without ?site-key= (no QR code scanned) -->
+    <div class="state-overlay" id="no-site-state">
+      <div class="state-icon" style="color:var(--muted)">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M14 8v8M14 20v1.5" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="state-title">Scan the QR code.</div>
+      <p class="state-body">Please scan the QR code at your market to leave feedback.</p>
+    </div>
   </main>
 
   <script>
@@ -489,13 +516,17 @@
 
     /* ── Read ?site= param ── */
     const params  = new URLSearchParams(window.location.search);
-    const siteKey = params.get('site-key') || params.get('site') || '';
+    const siteKey = (params.get('site-key') || params.get('site') || '').trim();
     document.getElementById('site-name').value = siteKey;
 
     if (siteKey) {
       const badge = document.getElementById('site-badge');
       badge.textContent = siteKey.replace(/-/g, ' ');
       badge.style.display = 'inline-block';
+    } else {
+      /* No site means no sheet tab to write to: the workflow would drop it, so don't offer the form. */
+      document.getElementById('form-section').style.display = 'none';
+      document.getElementById('no-site-state').classList.add('active');
     }
 
     /* ── Required marker helpers ── */
@@ -577,6 +608,7 @@
         approx_time:        document.getElementById('approx-time').value,
         contact_info:       document.getElementById('contact-info').value.trim(),
         market_improvement: document.getElementById('improvement').value.trim(),
+        website:            document.getElementById('website').value,
         submitted_at: new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }),
       };
 
